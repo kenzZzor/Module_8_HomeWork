@@ -1,0 +1,115 @@
+public abstract class Beverage
+{
+    public void PrepareRecipe()
+    {
+        BoilWater();
+        Brew();
+        PourInCup();
+        if (CustomerWantsCondiments()) 
+        {
+            AddCondiments();
+        }
+    }
+
+    private void BoilWater()
+    {
+        Console.WriteLine("Кипячение воды");
+    }
+
+    private void PourInCup()
+    {
+        Console.WriteLine("Налить в чашку");
+    }
+    protected abstract void Brew();
+    protected abstract void AddCondiments();
+
+    protected virtual bool CustomerWantsCondiments()
+    {
+        return true; 
+    }
+}
+
+public class Tea : Beverage
+{
+    protected override void Brew()
+    {
+        Console.WriteLine("Завариваем чай");
+    }
+
+    protected override void AddCondiments()
+    {
+        Console.WriteLine("Добавляем лимон");
+    }
+}
+
+public class Coffee : Beverage
+{
+    protected override void Brew()
+    {
+        Console.WriteLine("Завариваем кофе");
+    }
+
+    protected override void AddCondiments()
+    {
+        Console.WriteLine("Добавляем молоко и сахар");
+    }
+
+    protected override bool CustomerWantsCondiments()
+    {
+        Console.Write("Вы хотите добавить молоко и сахар? (да/нет): ");
+        string input = Console.ReadLine();
+        return input.ToLower() == "да";
+    }
+}
+
+public class HotChocolate : Beverage
+{
+    protected override void Brew()
+    {
+        Console.WriteLine("Смешиваем какао с водой");
+    }
+
+    protected override void AddCondiments()
+    {
+        Console.WriteLine("Добавляем взбитые сливки");
+    }
+
+    // Переопределение метода, если не нужны добавки
+    protected override bool CustomerWantsCondiments()
+    {
+        Console.Write("Вы хотите добавить взбитые сливки? (да/нет): ");
+        string input = Console.ReadLine();
+        return input.ToLower() == "да";
+    }
+}
+
+public class SpecialTea : Tea
+{
+    public override void PrepareRecipe()
+    {
+        BoilWater();
+        if (CustomerWantsCondiments()) // Сначала добавим лимон
+        {
+            AddCondiments();
+        }
+        Brew(); // Потом завариваем чай
+        PourInCup();
+    }
+}
+
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Beverage tea = new Tea();
+        Console.WriteLine("\nПриготовление чая:");
+        tea.PrepareRecipe();
+        
+        Beverage coffee = new Coffee();
+        Console.WriteLine("\nПриготовление кофе:");
+        coffee.PrepareRecipe();
+    }
+}
+
+
