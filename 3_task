@@ -1,0 +1,107 @@
+public interface IMediator
+{
+    void SendMessage(string message, User user);
+    void AddUser(User user);
+    void RemoveUser(User user);
+}
+
+public class ChatRoom : IMediator
+{
+    private List<User> _users;
+
+    public ChatRoom()
+    {
+        _users = new List<User>();
+    }
+
+    public void SendMessage(string message, User sender)
+    {
+        foreach (var user in _users)
+        {
+            if (user != sender)
+            {
+                user.ReceiveMessage(message, sender.Name);
+            }
+        }
+    }
+
+    public void AddUser(User user)
+    {
+        _users.Add(user);
+        Notify($"{user.Name} присоединился к чату.");
+    }
+
+    public void RemoveUser(User user)
+    {
+        _users.Remove(user);
+        Notify($"{user.Name} покинул чат.");
+    }
+
+    private void Notify(string message)
+    {
+        foreach (var user in _users)
+        {
+            user.ReceiveSystemMessage(message);
+        }
+    }
+}
+
+public abstract class User
+{
+    protected IMediator _mediator;
+    public string Name { get; private set; }
+
+    public User(IMediator mediator, string name)
+    {
+        _mediator = mediator;
+        Name = name;
+    }
+
+    public abstract void SendMessage(string message);
+    public abstract void ReceiveMessage(string message, string from);
+    public abstract void ReceiveSystemMessage(string message);
+}
+
+public class ChatUser : User
+{
+    public ChatUser(IMediator mediator, string name) : base(mediator, name)
+    {
+    }
+
+    public override void SendMessage(string message)
+    {
+        Console.WriteLine($"{Name} отправляет сообщение: {message}");
+        _mediator.SendMessage(message, this);
+    }
+
+    public override void ReceiveMessage(string message, string from)
+    {
+        Console.WriteLine($"{Name} получил сообщение от {from}: {message}");
+    }
+
+    public override void ReceiveSystemMessage(string message)
+    {
+        Console.WriteLine($"{Name} получил системное сообщение: {message}");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+
+        ChatRoom chatRoom = new ChatRoom();
+        User alice = new ChatUser(chatRoom, "Алиса");
+        User bob = new ChatUser(chatRoom, "Боб");
+        User charlie = new ChatUser(chatRoom, "Чарли");
+        chatRoom.AddUser(alice);
+        chatRoom.AddUser(bob);
+        chatRoom.AddUser(charlie);
+
+        alice.SendMessage("Привет всем!");
+        bob.SendMessage("Привет, Алиса!");
+        charlie.SendMessage("Как дела?");
+        
+        chatRoom.RemoveUser(alice);
+    }
+}
